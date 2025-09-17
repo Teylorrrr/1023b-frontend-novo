@@ -1,0 +1,5 @@
+{
+    "rewrites": [
+        { "source": "/api/path*", "destination": "https://one023b-backend-novoo-vcii.onrender.com/:path*" }
+    ]
+}
