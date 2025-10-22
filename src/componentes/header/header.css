@@ -8,23 +8,27 @@
 
 header {
   --header-height: 80px;
+  width: 100%;
   height: var(--header-height);
   background-color: #004b8d;
   display: flex;
-  justify-content: center;   /* centraliza horizontalmente */
-  align-items: center;       /* centraliza verticalmente */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  position: relative;
 }
+
 .menu-bloco{
-  height: 100%; /* ← o que você quer */
+  height: 100%; 
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0 12px;
   text-decoration: none;
   color: white;
   font-weight: bold;
   text-transform: uppercase;
-  gap: 10px;
+  gap: 20px;
   font-size: calc(var(--header-height) / 5); 
 }
 .material-symbols-outlined {
@@ -35,9 +39,93 @@ header {
 .menu-bloco a {
   color: white;
   text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
 }
-.menu-bloco a:hover {
-  text-decoration: none;
+.menu-bloco a:hover,
+.menu-bloco a.active {
   color: tomato;
-  transition: background-color 0.5s;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos do carrinho */
+.cart-container {
+  position: relative;
+}
+
+.cart-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cart-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cart-count {
+  background-color: tomato;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.cart-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  z-index: 1000;
+  margin-top: 0.5rem;
+  color: #333;
+}
+
+.cart-dropdown h3 {
+  margin-bottom: 1rem;
+  color: #004b8d;
+  font-size: 1.2rem;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.checkout-button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background-color: #004b8d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.checkout-button:hover {
+  background-color: #003366;
 }

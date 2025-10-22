@@ -17,20 +17,25 @@ function Login(){
         const email = formData.get("email")
         const senha = formData.get("senha")
 
+        // Obter a URL de redirecionamento, se existir
+        const redirectUrl = searchParams.get('redirect') || '/';
+        
         //chamar a API.post para mandar o login e senha
         api.post("/login",{
             email,
             senha
         }).then(resposta=>{
             if(resposta.status===200){
-                localStorage.setItem("token",resposta?.data?.token)
-                navigate("/")
+                localStorage.setItem("token",resposta?.data?.token);
+                // Redireciona para a URL original ou para a página inicial
+                window.location.href = redirectUrl;
             }
         }).catch((error:any)=>{
             const msg = error?.response?.data?.mensagem || 
-                        error?.mensagem || 
-                        "Erro Desconhecido!"
-            navigate(`/login?mensagem=${encodeURIComponent(msg)}`)
+                       error?.mensagem || 
+                       "Erro Desconhecido!"
+            // Mantém o parâmetro de redirecionamento na URL de erro
+            navigate(`/login?redirect=${encodeURIComponent(redirectUrl)}&mensagem=${encodeURIComponent(msg)}`)
         })
     }
 

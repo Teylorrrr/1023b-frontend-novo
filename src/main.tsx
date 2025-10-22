@@ -15,26 +15,44 @@ import './componentes/footer/footer.css'
 
 
 const PaginaPadrao = ({ children }: { children: React.ReactNode }) => (
-  <>
+  <div style={{ 
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    width: '100%',
+    margin: 0,
+    padding: 0,
+    alignItems: 'center'
+  }}>
     <Header />
-    {children}
+    <main style={{
+      flex: 1,
+      width: '100%',
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '1rem',
+      boxSizing: 'border-box'
+    }}>
+      {children}
+    </main>
     <Footer />
-  </>
+  </div>
 )
 
 ///////////////// Roteador ////////////////////////////
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <PaginaPadrao><App /></PaginaPadrao>
-  },
-   {
-    path: '/Login',
-    element: <PaginaPadrao><Login /></PaginaPadrao>
+    element: <PaginaPadrao><App /></PaginaPadrao>,
+    errorElement: <PaginaPadrao><Erro /></PaginaPadrao>
   },
   {
-    path: '/Erro',
-    element: <PaginaPadrao><Erro /></PaginaPadrao>
+    path: '/login',
+    element: <Login />
+  },
+  {
+    path: '/error',
+    element: <Erro />
   }
 ]);
 

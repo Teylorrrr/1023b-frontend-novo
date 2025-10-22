@@ -34,13 +34,41 @@ function App() {
     })
     form.reset()
   }
-  function adicionarCarrinho(produtoId: string) {
-    api.post('/adicionarItem',{ produtoId , quantidade:1 })
-    .then(()=>alert("Produto adicionando no carrinho!"))
-    .catch((error) => {
-      console.error('Error posting data:', error)
-      alert('Error posting data:'+error?.mensagem)
-    })
+  const adicionarCarrinho = async (produtoId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Se não houver token, redireciona para o login com mensagem
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}&mensagem=${encodeURIComponent('Por favor, faça login para adicionar itens ao carrinho')}`;
+        return;
+      }
+      
+      const response = await api.post('/adicionarItem', { produtoId, quantidade: 1 });
+      
+      // Verifica se a resposta foi bem sucedida (status 2xx)
+      if (response.status >= 200 && response.status < 300) {
+        // Atualiza o carrinho no header
+        const headerElement = document.querySelector('header');
+        if (headerElement) {
+          // Dispara um evento personalizado para atualizar o carrinho
+          window.dispatchEvent(new CustomEvent('carrinhoAtualizado'));
+        }
+        
+        // Mostra mensagem de sucesso apenas se o item foi realmente adicionado
+        if (response.data?.sucesso !== false) {
+          alert('Produto adicionado ao carrinho com sucesso!');
+        }
+      }
+    } catch (error: any) {
+      console.error('Erro ao adicionar ao carrinho:', error);
+      
+      // Se o erro for 401 (não autorizado), o interceptor já redireciona para o login
+      // Para outros erros, mostramos uma mensagem ao usuário
+      if (error?.response?.status !== 401) {
+        const mensagem = error?.response?.data?.mensagem || 'Erro ao adicionar ao carrinho';
+        alert(mensagem);
+      }
+    }
   }
   return (
     <>
@@ -68,4 +96,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
