@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import Login from './componentes/login/login.tsx'
+import LoginAdm from './componentes/login/loginadm.tsx'
 import Erro from './componentes/erro/erro.tsx'
 
 ///////////////// Componentes comuns ////////////////////////////
@@ -48,11 +49,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <Login />
+    element: <PaginaPadrao><Login /><LoginAdm /></PaginaPadrao>
   },
   {
     path: '/error',
-    element: <Erro />
+    element: <PaginaPadrao><Erro /></PaginaPadrao>
   }
 ]);
 
