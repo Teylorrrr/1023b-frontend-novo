@@ -14,6 +14,7 @@ export function Home() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -73,12 +74,14 @@ export function Home() {
               <h3>{produto.nome}</h3>
               <p className="produto-preco">R$ {produto.preco.toFixed(2)}</p>
               <p className="produto-descricao">{produto.descricao}</p>
-              <button 
-                className="adicionar-carrinho"
-                onClick={() => adicionarCarrinho(produto._id)}
-              >
-                Adicionar ao Carrinho
-              </button>
+              {isAdmin && (
+                <button 
+                  className="adicionar-carrinho"
+                  onClick={() => adicionarCarrinho(produto._id)}
+                >
+                  Adicionar ao Carrinho
+                </button>
+              )}
             </div>
           </div>
         ))}

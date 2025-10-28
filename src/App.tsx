@@ -11,6 +11,7 @@ type ProdutoType = {
 }
 function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([])
+  const isAdmin = localStorage.getItem('isAdmin') === 'true'
   useEffect(() => {
     api.get("/produtos")
       .then((response) => setProdutos(response.data))
@@ -71,28 +72,63 @@ function App() {
     }
   }
   return (
-    <>
-      <div>Cadastro de Produtos</div>
-      <form onSubmit={handleForm}>
-        <input type="text" name="nome" placeholder="Nome" />
-        <input type="number" name="preco" placeholder="Preço" />
-        <input type="text" name="urlfoto" placeholder="URL da Foto" />
-        <input type="text" name="descricao" placeholder="Descrição" />
-        <button type="submit">Cadastrar</button>
-      </form>
-      <div>Lista de Produtos</div>
-      {
-        produtos.map((produto) => (
-          <div key={produto._id}>
-            <h2>{produto.nome}</h2>
-            <p>R$ {produto.preco}</p>
-            <img src={produto.urlfoto} alt={produto.nome} width="200" />
-            <p>{produto.descricao}</p>
-            <button onClick={()=>adicionarCarrinho(produto._id)}>Adicionar ao carrinho</button>
+    <div className="container">
+      {isAdmin && (
+        <div className="formulario-cadastro">
+          <h2>Cadastro de Produtos</h2>
+          <form onSubmit={handleForm}>
+            <div className="campos-formulario">
+              <div className="grupo-campo">
+                <label htmlFor="nome">Nome do Produto</label>
+                <input type="text" id="nome" name="nome" placeholder="Ex: Camiseta Estampada" required />
+              </div>
+              <div className="grupo-campo">
+                <label htmlFor="preco">Preço (R$)</label>
+                <input type="number" id="preco" name="preco" placeholder="Ex: 99.90" min="0" step="0.01" required />
+              </div>
+              <div className="grupo-campo">
+                <label htmlFor="urlfoto">URL da Imagem</label>
+                <input type="url" id="urlfoto" name="urlfoto" placeholder="https://exemplo.com/imagem.jpg" required />
+              </div>
+              <div className="grupo-campo">
+                <label htmlFor="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" placeholder="Descreva o produto" required />
+              </div>
+            </div>
+            <button type="submit" className="botao-enviar">Cadastrar Produto</button>
+          </form>
+        </div>
+      )}
+      
+      <h2 className="titulo-pagina">Nossos Produtos</h2>
+      <div className="produtos-lista">
+        {produtos.map((produto) => (
+          <div key={produto._id} className="produto-card">
+            <div className="produto-imagem-container">
+              <img 
+                src={produto.urlfoto} 
+                alt={produto.nome} 
+                className="produto-imagem"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Imagem+Não+Disponível';
+                }}
+              />
+            </div>
+            <div className="produto-info">
+              <h3 className="produto-nome">{produto.nome}</h3>
+              <p className="produto-preco">R$ {Number(produto.preco).toFixed(2).replace('.', ',')}</p>
+              <p className="produto-descricao">{produto.descricao}</p>
+              <button 
+                className="botao-carrinho"
+                onClick={() => adicionarCarrinho(produto._id)}
+              >
+                Adicionar ao Carrinho
+              </button>
+            </div>
           </div>
-        ))
-      }
-    </>
+        ))}
+      </div>
+    </div>
   )
 }
 

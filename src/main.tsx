@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
-import Login from './componentes/login/login.tsx'
-import LoginAdm from './componentes/login/loginadm.tsx'
+import LoginPage from './pages/LoginPage/LoginPage';
+import AdminPage from './pages/Admin/AdminPage';
 import Erro from './componentes/erro/erro.tsx'
 
 ///////////////// Componentes comuns ////////////////////////////
@@ -49,11 +49,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <PaginaPadrao><Login /><LoginAdm /></PaginaPadrao>
+    element: <PaginaPadrao><LoginPage /></PaginaPadrao>
   },
   {
     path: '/error',
     element: <PaginaPadrao><Erro /></PaginaPadrao>
+  },
+  {
+    path: '/admin',
+    element: <PaginaPadrao><AdminPage /></PaginaPadrao>
   }
 ]);
 
