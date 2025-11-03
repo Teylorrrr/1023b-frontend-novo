@@ -9,7 +9,11 @@ interface ProdutoFormData {
   urlfoto: string;
 }
 
-const CadastroProduto: React.FC = () => {
+interface CadastroProdutoProps {
+  onProdutoCadastrado?: () => void;
+}
+
+const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }) => {
   const [formData, setFormData] = useState<ProdutoFormData>({
     nome: '',
     preco: '',
@@ -45,13 +49,18 @@ const CadastroProduto: React.FC = () => {
           texto: 'Produto cadastrado com sucesso!', 
           tipo: 'sucesso' 
         });
-        // Limpar o formulário após o cadastro
+        setMensagem({ texto: 'Produto cadastrado com sucesso!', tipo: 'sucesso' });
         setFormData({
           nome: '',
           preco: '',
           descricao: '',
           urlfoto: ''
         });
+        
+        // Chama a função de callback se fornecida
+        if (onProdutoCadastrado) {
+          onProdutoCadastrado();
+        }
       }
     } catch (error: any) {
       console.error('Erro ao cadastrar produto:', error);
