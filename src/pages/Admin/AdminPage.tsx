@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
+import CadastroProduto from '../../componentes/produtos/CadastroProduto';
+import './AdminPage.css';
 
 interface Usuario {
   _id: string;
@@ -11,6 +13,7 @@ interface Usuario {
 
 const AdminPage = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [activeTab, setActiveTab] = useState<'usuarios' | 'produtos'>('usuarios');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -50,26 +53,50 @@ const AdminPage = () => {
       
       {error && <div className="error-message">{error}</div>}
       
-      <div className="usuarios-list">
-        <h2>Usuários Cadastrados</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Idade</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map(usuario => (
-              <tr key={usuario._id}>
-                <td>{usuario.nome}</td>
-                <td>{usuario.email}</td>
-                <td>{usuario.idade}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="admin-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
+          onClick={() => setActiveTab('usuarios')}
+        >
+          Gerenciar Usuários
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'produtos' ? 'active' : ''}`}
+          onClick={() => setActiveTab('produtos')}
+        >
+          Gerenciar Produtos
+        </button>
+      </div>
+      
+      <div className="tab-content">
+        {activeTab === 'usuarios' ? (
+          <div className="usuarios-list">
+            <h2>Usuários Cadastrados</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Idade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuarios.map(usuario => (
+                  <tr key={usuario._id}>
+                    <td>{usuario.nome}</td>
+                    <td>{usuario.email}</td>
+                    <td>{usuario.idade}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="produtos-section">
+            <h2>Cadastrar Novo Produto</h2>
+            <CadastroProduto />
+          </div>
+        )}
       </div>
     </div>
   );

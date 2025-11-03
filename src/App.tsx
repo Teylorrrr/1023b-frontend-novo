@@ -11,30 +11,12 @@ type ProdutoType = {
 }
 function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([])
-  const isAdmin = localStorage.getItem('isAdmin') === 'true'
+  
   useEffect(() => {
     api.get("/produtos")
       .then((response) => setProdutos(response.data))
       .catch((error) => console.error('Error fetching data:', error))
   }, [])
-  function handleForm(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = event.currentTarget
-    const formData = new FormData(form)
-    const data = {
-      nome: formData.get('nome') as string,
-      preco: Number(formData.get('preco')),
-      urlfoto: formData.get('urlfoto') as string,
-      descricao: formData.get('descricao') as string
-    }
-    api.post("/produtos",data)
-    .then((response) => setProdutos([...produtos, response.data]))
-    .catch((error) => {
-      console.error('Error posting data:', error)
-      alert('Error posting data:'+error?.mensagem)
-    })
-    form.reset()
-  }
   const adicionarCarrinho = async (produtoId: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -73,32 +55,6 @@ function App() {
   }
   return (
     <div className="container">
-      {isAdmin && (
-        <div className="formulario-cadastro">
-          <h2>Cadastro de Produtos</h2>
-          <form onSubmit={handleForm}>
-            <div className="campos-formulario">
-              <div className="grupo-campo">
-                <label htmlFor="nome">Nome do Produto</label>
-                <input type="text" id="nome" name="nome" placeholder="Ex: Camiseta Estampada" required />
-              </div>
-              <div className="grupo-campo">
-                <label htmlFor="preco">Preço (R$)</label>
-                <input type="number" id="preco" name="preco" placeholder="Ex: 99.90" min="0" step="0.01" required />
-              </div>
-              <div className="grupo-campo">
-                <label htmlFor="urlfoto">URL da Imagem</label>
-                <input type="url" id="urlfoto" name="urlfoto" placeholder="https://exemplo.com/imagem.jpg" required />
-              </div>
-              <div className="grupo-campo">
-                <label htmlFor="descricao">Descrição</label>
-                <textarea id="descricao" name="descricao" placeholder="Descreva o produto" required />
-              </div>
-            </div>
-            <button type="submit" className="botao-enviar">Cadastrar Produto</button>
-          </form>
-        </div>
-      )}
       
       <h2 className="titulo-pagina">Nossos Produtos</h2>
       <div className="produtos-lista">

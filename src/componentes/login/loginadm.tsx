@@ -19,10 +19,14 @@ function LoginAdm() {
         const redirectUrl = searchParams.get('redirect') || '/';
         
         try {
-            const resposta = await api.post("/login/adm", { email, senha });
+            const resposta = await api.post("/admin/login", { email, senha });
             if (resposta.status === 200) {
-                localStorage.setItem("token", resposta?.data?.token);
+                // Salva o token no localStorage
+                localStorage.setItem("token", resposta.data.token);
+                // Salva as informações do usuário
+                localStorage.setItem("usuario", JSON.stringify(resposta.data.usuario));
                 localStorage.setItem("isAdmin", "true");
+                
                 // Redireciona para a página de administração
                 window.location.href = '/admin';
             }
