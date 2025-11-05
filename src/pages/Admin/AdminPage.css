@@ -50,32 +50,71 @@
 }
 
 /* Estilos para os botões de ação */
+.actions-cell {
+  width: 220px;
+  text-align: right;
+}
+
+.actions-container {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .action-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 8px;
-  margin: 0 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin: 0;
+  border: 1px solid transparent;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .action-button:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 .action-button.edit {
-  color: #007bff;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
 }
 
 .action-button.delete {
-  color: #dc3545;
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-color: #ffcdd2;
 }
 
-.action-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.action-button.edit:hover {
+  background-color: #bbdefb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-button.delete:hover {
+  background-color: #ffcdd2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.action-button .material-symbols-outlined {
+  font-size: 1.1rem;
+  margin-right: 2px;
 }
 
 /* Estilo para o cabeçalho da seção */
@@ -248,4 +287,28 @@ tr:hover {
   th, td {
     padding: 0.75rem 0.5rem;
   }
+}
+/* Estilos para o modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

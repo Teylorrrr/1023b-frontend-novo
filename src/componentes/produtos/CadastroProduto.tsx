@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/api';
 import './CadastroProduto.css';
 
@@ -9,11 +9,27 @@ interface ProdutoFormData {
   urlfoto: string;
 }
 
-interface CadastroProdutoProps {
-  onProdutoCadastrado?: () => void;
+interface Produto {
+  _id?: string;
+  nome: string;
+  preco: number;
+  descricao: string;
+  urlfoto: string;
 }
 
-const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }) => {
+interface CadastroProdutoProps {
+  produto?: Produto | null;
+  onProdutoCadastrado?: () => void;
+  onProdutoAtualizado?: () => void;
+  onCancelarEdicao?: () => void;
+}
+
+const CadastroProduto: React.FC<CadastroProdutoProps> = ({
+  produto,
+  onProdutoCadastrado,
+  onProdutoAtualizado,
+  onCancelarEdicao
+}) => {
   const [formData, setFormData] = useState<ProdutoFormData>({
     nome: '',
     preco: '',
@@ -23,12 +39,22 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }
   const [loading, setLoading] = useState(false);
   const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
 
+  useEffect(() => {
+    if (produto) {
+      setFormData({
+        nome: produto.nome,
+        preco: produto.preco.toString(),
+        descricao: produto.descricao,
+        urlfoto: produto.urlfoto
+      });
+    } else {
+      setFormData({ nome: '', preco: '', descricao: '', urlfoto: '' });
+    }
+  }, [produto]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,35 +64,28 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }
 
     try {
       const produtoData = {
-        ...formData,
-        preco: parseFloat(formData.preco)
+        nome: formData.nome,
+        preco: parseFloat(formData.preco),
+        descricao: formData.descricao,
+        urlfoto: formData.urlfoto
       };
 
-      const response = await api.post('/produtos', produtoData);
-      
-      if (response.status === 201) {
-        setMensagem({ 
-          texto: 'Produto cadastrado com sucesso!', 
-          tipo: 'sucesso' 
-        });
+      if (produto && produto._id) {
+        await api.put(`/produtos/${produto._id}`, produtoData);
+        setMensagem({ texto: 'Produto atualizado com sucesso!', tipo: 'sucesso' });
+        onProdutoAtualizado?.();
+      } else {
+        await api.post('/produtos', produtoData);
         setMensagem({ texto: 'Produto cadastrado com sucesso!', tipo: 'sucesso' });
-        setFormData({
-          nome: '',
-          preco: '',
-          descricao: '',
-          urlfoto: ''
-        });
-        
-        // Chama a função de callback se fornecida
-        if (onProdutoCadastrado) {
-          onProdutoCadastrado();
-        }
+        onProdutoCadastrado?.();
       }
+
+      setFormData({ nome: '', preco: '', descricao: '', urlfoto: '' });
     } catch (error: any) {
-      console.error('Erro ao cadastrar produto:', error);
-      setMensagem({ 
-        texto: error.response?.data?.error || 'Erro ao cadastrar produto. Tente novamente.', 
-        tipo: 'erro' 
+      console.error('Erro ao salvar produto:', error);
+      setMensagem({
+        texto: error.response?.data?.mensagem || 'Erro ao salvar produto. Tente novamente.',
+        tipo: 'erro'
       });
     } finally {
       setLoading(false);
@@ -75,13 +94,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }
 
   return (
     <div className="cadastro-produto">
-      <h2>Cadastrar Novo Produto</h2>
-      
-      {mensagem && (
-        <div className={`mensagem ${mensagem.tipo}`}>
-          {mensagem.texto}
-        </div>
-      )}
+      {mensagem && <div className={`mensagem ${mensagem.tipo}`}>{mensagem.texto}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -138,9 +151,28 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ onProdutoCadastrado }
           />
         </div>
 
-        <button type="submit" disabled={loading} className="btn-cadastrar">
-          {loading ? 'Cadastrando...' : 'Cadastrar Produto'}
-        </button>
+        <div className="botoes-form">
+          <button type="submit" disabled={loading} className="btn-cadastrar">
+            {loading
+              ? produto
+                ? 'Atualizando...'
+                : 'Cadastrando...'
+              : produto
+              ? 'Atualizar Produto'
+              : 'Cadastrar Produto'}
+          </button>
+
+          {produto && onCancelarEdicao && (
+            <button
+              type="button"
+              className="btn-cancelar"
+              onClick={onCancelarEdicao}
+              disabled={loading}
+            >
+              Cancelar Edição
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

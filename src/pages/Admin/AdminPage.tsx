@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import CadastroProduto from '../../componentes/produtos/CadastroProduto';
@@ -25,11 +25,16 @@ const AdminPage = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [activeTab, setActiveTab] = useState<'usuarios' | 'produtos'>('usuarios');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [produtosLoading, setProdutosLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
+  const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
+
+  const formRef = useRef<HTMLDivElement | null>(null);
+
   const navigate = useNavigate();
 
-  // Função para carregar os usuários
+  // Carregar usuários
   const carregarUsuarios = async () => {
     try {
       const response = await api.get('/usuarios');
@@ -41,7 +46,7 @@ const AdminPage = () => {
     }
   };
 
-  // Função para carregar os produtos
+  // Carregar produtos
   const carregarProdutos = async () => {
     try {
       setProdutosLoading(true);
@@ -57,11 +62,9 @@ const AdminPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    
+
     if (!token || !isAdmin) {
-      navigate('/login', { 
-        state: { mensagem: 'Acesso negado. Faça login como administrador.' } 
-      });
+      navigate('/login', { state: { mensagem: 'Acesso negado. Faça login como administrador.' } });
       return;
     }
 
@@ -69,31 +72,36 @@ const AdminPage = () => {
     carregarProdutos();
   }, [navigate]);
 
-  // Função para formatar data
-  const formatarData = (dataString: string) => {
-    return new Date(dataString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Excluir produto
+  const handleExcluirProduto = async (id: string) => {
+    try {
+      await api.delete(`/produtos/${id}`);
+      setMensagem({ texto: 'Produto excluído com sucesso!', tipo: 'sucesso' });
+      carregarProdutos();
+    } catch {
+      setMensagem({ texto: 'Erro ao excluir produto.', tipo: 'erro' });
+    }
   };
 
-  // Função para deletar um produto
-  const handleDeletarProduto = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
-      try {
-        setLoading(true);
-        await api.delete(`/produtos/${id}`);
-        // Atualiza a lista de produtos após a exclusão
-        await carregarProdutos();
-      } catch (err: any) {
-        setError('Erro ao excluir produto: ' + (err.response?.data?.mensagem || 'Erro desconhecido'));
-      } finally {
-        setLoading(false);
-      }
-    }
+  // Abrir edição de produto e rolar para o formulário
+  const handleAbrirEdicao = (produto: Produto) => {
+    setProdutoEditando(produto);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  // Produto cadastrado
+  const handleProdutoCadastrado = () => {
+    carregarProdutos();
+    setMensagem({ texto: 'Produto cadastrado com sucesso!', tipo: 'sucesso' });
+  };
+
+  // Produto atualizado
+  const handleProdutoAtualizado = () => {
+    carregarProdutos();
+    setMensagem({ texto: 'Produto atualizado com sucesso!', tipo: 'sucesso' });
+    setProdutoEditando(null);
   };
 
   if (loading) {
@@ -103,24 +111,25 @@ const AdminPage = () => {
   return (
     <div className="admin-container">
       <h1>Painel de Controle Administrativo</h1>
-      
+
       {error && <div className="error-message">{error}</div>}
-      
+      {mensagem && <div className={`mensagem ${mensagem.tipo}`}>{mensagem.texto}</div>}
+
       <div className="admin-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
           onClick={() => setActiveTab('usuarios')}
         >
           Gerenciar Usuários
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'produtos' ? 'active' : ''}`}
           onClick={() => setActiveTab('produtos')}
         >
           Gerenciar Produtos
         </button>
       </div>
-      
+
       <div className="tab-content">
         {activeTab === 'usuarios' ? (
           <div className="usuarios-list">
@@ -134,7 +143,7 @@ const AdminPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {usuarios.map(usuario => (
+                {usuarios.map((usuario) => (
                   <tr key={usuario._id}>
                     <td>{usuario.nome}</td>
                     <td>{usuario.email}</td>
@@ -147,57 +156,49 @@ const AdminPage = () => {
         ) : (
           <div className="produtos-section">
             <h2>Gerenciar Produtos</h2>
-            
-            <div className="produtos-lista">
-              <div className="section-header">
-                <h3>Lista de Produtos</h3>
-              </div>
-              {produtosLoading ? (
-                <div className="loading">Carregando produtos...</div>
-              ) : produtos.length === 0 ? (
-                <p>Nenhum produto cadastrado.</p>
-              ) : (
-                <table className="produtos-table">
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>Preço (R$)</th>
-                      <th>Descrição</th>
-                      <th>Data de Cadastro</th>
-                      <th>Ações</th>
+
+            {produtosLoading ? (
+              <div className="loading">Carregando produtos...</div>
+            ) : produtos.length === 0 ? (
+              <p>Nenhum produto cadastrado.</p>
+            ) : (
+              <table className="produtos-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Preço (R$)</th>
+                    <th>Descrição</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {produtos.map((produto) => (
+                    <tr key={produto._id}>
+                      <td>{produto.nome}</td>
+                      <td>{produto.preco.toFixed(2)}</td>
+                      <td>{produto.descricao}</td>
+                      <td className="actions-cell">
+                        <button className="action-button edit" onClick={() => handleAbrirEdicao(produto)}>
+                          Editar
+                        </button>
+                        <button className="action-button delete" onClick={() => handleExcluirProduto(produto._id)}>
+                          Excluir
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {produtos.map(produto => (
-                      <tr key={produto._id}>
-                        <td>{produto.nome}</td>
-                        <td>{produto.preco.toFixed(2)}</td>
-                        <td>{produto.descricao}</td>
-                        <td>{formatarData(produto.dataCriacao)}</td>
-                        <td>
-                          <button className="action-button edit" title="Editar">
-                            <span className="material-symbols-outlined">edit</span>
-                          </button>
-                          <button 
-                            className="action-button delete" 
-                            title="Excluir"
-                            onClick={() => handleDeletarProduto(produto._id)}
-                            disabled={loading}
-                          >
-                            <span className="material-symbols-outlined">delete</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-            
-            
-            <div className="cadastro-produto">
-              <h3>Cadastrar Novo Produto</h3>
-              <CadastroProduto onProdutoCadastrado={carregarProdutos} />
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            <div className="cadastro-produto-container" ref={formRef}>
+              <h3>{produtoEditando ? 'Editar Produto' : 'Cadastrar Novo Produto'}</h3>
+              <CadastroProduto
+                produto={produtoEditando}
+                onProdutoCadastrado={handleProdutoCadastrado}
+                onProdutoAtualizado={handleProdutoAtualizado}
+                onCancelarEdicao={() => setProdutoEditando(null)}
+              />
             </div>
           </div>
         )}
