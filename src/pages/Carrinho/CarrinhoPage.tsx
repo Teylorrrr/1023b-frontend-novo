@@ -11,15 +11,7 @@ interface CartItem {
   urlfoto?: string;
 }
 
-const CarrinhoPage: React.FC = () => {
-  const { cart, removeFromCart, updateQuantity, total, loading } = useCart();
-  const navigate = useNavigate();
-
-  const handleFinalizarPedido = () => {
-    navigate('/finalizar-pedido');
-  };
-
-  const handleQuantityChange = (productId: string, newQuantity: number) => {
+const Carrihange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       removeFromCart(productId);
     } else {
